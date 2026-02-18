@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(pnpm( run)? dev|nx serve|nx dev|nx run .+:serve|nx run .+:dev)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\necho '[Hook] BLOCKED: Dev server must run in tmux for log access' >&2\necho '[Hook] Use one of these instead:' >&2\necho \"[Hook]   tmux new-session -d -s api 'pnpm nx serve api'\" >&2\necho \"[Hook]   tmux new-session -d -s admin 'pnpm nx serve admin'\" >&2\necho '[Hook] Then: tmux attach -t api' >&2\nexit 1"
+          }
+        ],
+        "description": "Block dev servers outside tmux — Nx serve/dev commands need persistent sessions"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(npm install|npm add|yarn add|yarn install|bun install|bun add)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\necho '[Hook] BLOCKED: This monorepo uses pnpm as the package manager' >&2\necho '[Hook] Use: pnpm add <package>' >&2\necho '[Hook] Or:  pnpm install' >&2\nexit 1"
+          }
+        ],
+        "description": "Enforce pnpm — block npm/yarn/bun install commands"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"pnpm (install|add|remove|test|build|lint)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nif [ -z \"$TMUX\" ]; then\n  echo '[Hook] Consider running in tmux for session persistence' >&2\n  echo '[Hook] tmux new -s dev  |  tmux attach -t dev' >&2\nfi\necho \"$input\""
+          }
+        ],
+        "description": "Reminder to use tmux for long-running pnpm commands"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"git push\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\necho '[Hook] Review changes before push...' >&2\necho '[Hook] Checking for uncommitted changes...' >&2\nif ! git diff --quiet 2>/dev/null; then\n  echo '[Hook] WARNING: You have unstaged changes!' >&2\nfi\necho '[Hook] Press Enter to continue with push or Ctrl+C to abort...' >&2\nread -r"
+          }
+        ],
+        "description": "Pause before git push to review changes"
+      },
+      {
+        "matcher": "tool == \"Write\" && tool_input.file_path matches \"\\\\.(md|txt)$\" && !(tool_input.file_path matches \"(README|CLAUDE|AGENTS|CONTRIBUTING|INDEX)\\\\.md$\") && !(tool_input.file_path matches \"docs/features/\")",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] BLOCKED: Unnecessary documentation file creation\" >&2\necho \"[Hook] File: $file_path\" >&2\necho \"[Hook] Use README.md or docs/features/ for documentation\" >&2\nexit 1"
+          }
+        ],
+        "description": "Block random .md files — allow docs/features/ and standard docs"
+      },
+      {
+        "matcher": "tool == \"Write\" && tool_input.file_path matches \"database/migrations/\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\nfilename=$(basename \"$file_path\")\n\n# Check naming convention: YYYYMMDDHHMMSS_description.sql\nif ! echo \"$filename\" | grep -qE '^[0-9]{14}_[a-z_]+\\.sql$'; then\n  echo \"[Hook] WARNING: Migration naming convention mismatch\" >&2\n  echo \"[Hook] Expected: YYYYMMDDHHMMSS_description.sql\" >&2\n  echo \"[Hook] Got: $filename\" >&2\nfi\n\necho \"[Hook] Creating migration: $filename\" >&2\necho \"[Hook] Ensure it has both UP and DOWN sections\" >&2\necho \"[Hook] Use IF NOT EXISTS / IF EXISTS for idempotency\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Validate naming and warn about migration best practices"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(DROP TABLE|DROP DATABASE|TRUNCATE|DELETE FROM .+ WHERE 1|DELETE FROM .+;$)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\necho '[Hook] BLOCKED: Destructive SQL operation detected' >&2\necho '[Hook] If intentional, run this manually in your database client' >&2\nexit 1"
+          }
+        ],
+        "description": "Block destructive SQL operations — DROP, TRUNCATE, mass DELETE"
+      },
+      {
+        "matcher": "tool == \"Write\" && tool_input.file_path matches \"\\\\.env\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\nif echo \"$file_path\" | grep -qE '\\.env\\.example$'; then\n  echo \"$input\"\nelse\n  echo \"[Hook] BLOCKED: Cannot write to .env files\" >&2\n  echo \"[Hook] File: $file_path\" >&2\n  echo \"[Hook] Manage secrets manually or via .env.example templates\" >&2\n  exit 1\nfi"
+          }
+        ],
+        "description": "Block writing to .env files (allow .env.example)"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"libs/shared/\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] CAUTION: Editing shared library code\" >&2\necho \"[Hook] File: $file_path\" >&2\necho \"[Hook] Changes here affect ALL apps (admin, partner, resident, api)\" >&2\necho \"[Hook] Run 'pnpm nx affected --target=test' after changes\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Warn when editing shared libraries — changes ripple across all apps"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"nx run-many\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nif [ -z \"$TMUX\" ]; then\n  echo '[Hook] nx run-many can take a while — consider using tmux' >&2\nfi\necho \"$input\""
+          }
+        ],
+        "description": "Warn about long-running nx run-many commands"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "tool == \"Bash\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\ncmd=$(echo \"$input\" | jq -r '.tool_input.command')\n\nif echo \"$cmd\" | grep -qE 'gh pr create'; then\n  output=$(echo \"$input\" | jq -r '.tool_output.output // \"\"')\n  pr_url=$(echo \"$output\" | grep -oE 'https://github.com/[^/]+/[^/]+/pull/[0-9]+')\n  \n  if [ -n \"$pr_url\" ]; then\n    echo \"[Hook] PR created: $pr_url\" >&2\n    repo=$(echo \"$pr_url\" | sed -E 's|https://github.com/([^/]+/[^/]+)/pull/[0-9]+|\\1|')\n    pr_num=$(echo \"$pr_url\" | sed -E 's|.*/pull/([0-9]+)|\\1|')\n    echo \"[Hook] To review: gh pr review $pr_num --repo $repo\" >&2\n  fi\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "Log PR URL and provide review command after PR creation"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.(ts|tsx|js|jsx)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\n\nif [ -n \"$file_path\" ] && [ -f \"$file_path\" ]; then\n  if command -v prettier >/dev/null 2>&1; then\n    prettier --write \"$file_path\" 2>&1 | head -5 >&2\n  elif [ -f \"node_modules/.bin/prettier\" ]; then\n    node_modules/.bin/prettier --write \"$file_path\" 2>&1 | head -5 >&2\n  fi\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "Auto-format JS/TS files with Prettier after edits"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.(ts|tsx)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\n\nif [ -n \"$file_path\" ] && [ -f \"$file_path\" ]; then\n  dir=$(dirname \"$file_path\")\n  project_root=\"$dir\"\n  while [ \"$project_root\" != \"/\" ] && [ ! -f \"$project_root/tsconfig.json\" ] && [ ! -f \"$project_root/tsconfig.base.json\" ]; do\n    project_root=$(dirname \"$project_root\")\n  done\n  \n  if [ -f \"$project_root/tsconfig.json\" ] || [ -f \"$project_root/tsconfig.base.json\" ]; then\n    cd \"$project_root\" && npx tsc --noEmit --pretty false 2>&1 | grep \"$(basename \"$file_path\")\" | head -10 >&2 || true\n  fi\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "TypeScript check after editing .ts/.tsx files"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.(ts|tsx|js|jsx)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\n\nif [ -n \"$file_path\" ] && [ -f \"$file_path\" ]; then\n  console_logs=$(grep -n \"console\\\\.log\" \"$file_path\" 2>/dev/null || true)\n  \n  if [ -n \"$console_logs\" ]; then\n    echo \"[Hook] WARNING: console.log found in $file_path\" >&2\n    echo \"$console_logs\" | head -5 >&2\n    echo \"[Hook] Use NestJS Logger instead of console.log\" >&2\n  fi\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "Warn about console.log statements — use NestJS Logger instead"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"eslint\\\\.config\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\necho \"[Hook] ESLint config changed — run 'pnpm nx run-many --target=lint' to validate\" >&2\necho \"[Hook] Check @nx/enforce-module-boundaries rules\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Remind to lint all projects and check module boundaries after ESLint changes"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"(nx\\\\.json|project\\\\.json|tsconfig\\\\.base\\\\.json)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] Nx config changed: $file_path\" >&2\necho \"[Hook] Run 'pnpm nx reset' if you experience caching issues\" >&2\necho \"[Hook] Run 'pnpm nx graph' to verify dependency graph\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Warn about Nx config changes — may need cache reset"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"database/migrations/\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] Migration file edited: $file_path\" >&2\necho \"[Hook] IMPORTANT: Never edit a migration that has already been applied\" >&2\necho \"[Hook] Create a new migration instead if the old one has been run\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Warn when editing existing migration files"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"(middleware|clerk|auth)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] Auth-related file changed: $file_path\" >&2\necho \"[Hook] Verify Clerk role-based access (sessionClaims.metadata.role)\" >&2\necho \"[Hook] Test with all roles: admin, partner, resident\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Remind to verify Clerk role-based access after auth file changes"
+      },
+      {
+        "matcher": "tool == \"Write\" && tool_input.file_path matches \"\\\\.(ts|tsx|js|jsx)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\n\nif [ -n \"$file_path\" ] && [ -f \"$file_path\" ]; then\n  if command -v prettier >/dev/null 2>&1; then\n    prettier --write \"$file_path\" 2>&1 | head -5 >&2\n  elif [ -f \"node_modules/.bin/prettier\" ]; then\n    node_modules/.bin/prettier --write \"$file_path\" 2>&1 | head -5 >&2\n  fi\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "Auto-format newly created JS/TS files with Prettier"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  modified_files=$(git diff --name-only HEAD 2>/dev/null | grep -E '\\.(ts|tsx|js|jsx)$' || true)\n  \n  if [ -n \"$modified_files\" ]; then\n    has_console=false\n    while IFS= read -r file; do\n      if [ -f \"$file\" ]; then\n        if grep -q \"console\\.log\" \"$file\" 2>/dev/null; then\n          echo \"[Hook] WARNING: console.log found in $file\" >&2\n          has_console=true\n        fi\n      fi\n    done <<< \"$modified_files\"\n    \n    if [ \"$has_console\" = true ]; then\n      echo \"[Hook] Remove console.log statements before committing\" >&2\n      echo \"[Hook] Use NestJS Logger for server-side logging\" >&2\n    fi\n  fi\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "Final audit for console.log in modified files before session ends"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  modified_files=$(git diff --name-only HEAD 2>/dev/null || true)\n  \n  # Check for .env leaks\n  has_env=false\n  while IFS= read -r file; do\n    if echo \"$file\" | grep -qE '\\.env$|\\.env\\.local$|\\.env\\.production$'; then\n      echo \"[Hook] DANGER: .env file modified: $file\" >&2\n      has_env=true\n    fi\n  done <<< \"$modified_files\"\n  \n  if [ \"$has_env\" = true ]; then\n    echo \"[Hook] DO NOT commit .env files — check .gitignore\" >&2\n  fi\n  \n  # Check for Nx config changes\n  nx_affected=$(echo \"$modified_files\" | grep -E '(nx\\.json|project\\.json|tsconfig\\.base\\.json)' || true)\n  if [ -n \"$nx_affected\" ]; then\n    echo \"[Hook] Nx config files were modified — run 'pnpm nx affected --target=build' before pushing\" >&2\n  fi\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "Final audit for .env leaks and Nx config changes"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  # Check if new source files were created but no feature doc exists\n  new_files=$(git diff --name-only HEAD 2>/dev/null | grep -E '^apps/.+\\.(ts|tsx)$' || true)\n  \n  if [ -n \"$new_files\" ]; then\n    has_feature_doc=false\n    if [ -d \"docs/features\" ]; then\n      doc_count=$(ls docs/features/*.md 2>/dev/null | wc -l)\n      if [ \"$doc_count\" -gt 0 ]; then\n        has_feature_doc=true\n      fi\n    fi\n    \n    new_count=$(echo \"$new_files\" | wc -l)\n    if [ \"$new_count\" -gt 3 ] && [ \"$has_feature_doc\" = false ]; then\n      echo \"[Hook] REMINDER: New feature files detected but no docs/features/ documentation found\" >&2\n      echo \"[Hook] Run /document-feature to create living documentation for this feature\" >&2\n      echo \"[Hook] Feature docs help Claude understand your code in future sessions\" >&2\n    fi\n  fi\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "Remind to create feature documentation if new files created without matching docs"
+      }
+    ]
+  }
+}
