@@ -14,6 +14,8 @@
 | nx-dependency-analyzer | Project graph analysis | Restructuring, new libs |
 | migration-reviewer | SQL migration safety | Creating/editing migrations |
 | feature-documenter | Living feature documentation | After EVERY feature (MANDATORY) |
+| status-reporter | Project health dashboard | Sprint checks, pre-release compliance |
+| full-reviewer | Chained review pipeline | Before merging PRs, after major features |
 
 ## Mandatory Agent Usage
 

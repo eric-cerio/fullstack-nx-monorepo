@@ -1,0 +1,49 @@
+# Pipeline: full-review
+# Chains multiple review stages into a single comprehensive pass.
+# The full-reviewer agent reads this file and executes stages in order.
+
+name: full-review
+description: Comprehensive review pipeline — code, security, and coverage
+version: "1.0.0"
+
+stages:
+  - name: code-review
+    agent: code-reviewer
+    model: sonnet
+    required: true
+    fail_on: critical
+    checks:
+      - nx-boundaries
+      - clerk-auth-guards
+      - nestjs-patterns
+      - nextjs-patterns
+      - code-quality
+
+  - name: security-review
+    agent: security-reviewer
+    model: opus
+    required: true
+    fail_on: critical
+    checks:
+      - auth-bypass
+      - role-escalation
+      - sql-injection
+      - secret-exposure
+      - cors-config
+
+  - name: test-coverage
+    agent: tdd-guide
+    model: sonnet
+    required: true
+    fail_on: below_threshold
+    checks:
+      - per-project-coverage
+      - critical-path-coverage
+      - missing-test-files
+
+verdict:
+  approve: "Zero CRITICAL + zero HIGH across all stages + coverage above threshold"
+  block: "Any CRITICAL finding in any stage"
+  warn: "HIGH findings only OR coverage within 10% of threshold"
+
+output: unified-report

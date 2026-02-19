@@ -28,8 +28,10 @@
 - **Migration edit**: Warn about editing existing migrations
 - **PR creation**: Log PR URL after `gh pr create`
 - **Clerk auth**: Remind to verify roles after auth file changes
+- **INDEX auto-generator**: Regenerate `docs/features/INDEX.md` when a new feature doc is created
 
 ### Stop
 - **console.log audit**: Check modified files for console.log
 - **env leak check**: Check for `.env` file modifications
 - **feature doc reminder**: Remind to run `/document-feature` if new files created without matching docs
+- **session summary**: Save session summary (branch, modified files, untracked files) to `docs/session-logs/`

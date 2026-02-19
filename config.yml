@@ -1,0 +1,44 @@
+# Governance Framework Configuration
+version: "1.0.0"
+
+stack:
+  monorepo: nx
+  package_manager: pnpm
+  frontend: nextjs-15
+  backend: nestjs-11
+  auth_provider: clerk
+  database: sql
+  testing:
+    unit: jest
+    e2e: playwright
+  linting:
+    eslint: flat-config
+    prettier: true
+
+thresholds:
+  test_coverage: 80
+  max_file_lines: 800
+  max_function_lines: 50
+
+apps:
+  - admin
+  - partner
+  - resident
+  - landing-page
+  - api
+
+roles:
+  - admin
+  - partner
+  - resident
+
+conventions:
+  commits: conventional
+  migrations: "YYYYMMDDHHMMSS_description.sql"
+  branch_pattern: "type/scope-description"
+
+docs:
+  features_dir: docs/features
+  session_logs_dir: docs/session-logs
+
+overrides_file: config/overrides.yml

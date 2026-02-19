@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\necho '[Hook] BLOCKED: Dev server must run in tmux for log access' >&2\necho '[Hook] Use one of these instead:' >&2\necho \"[Hook]   tmux new-session -d -s api 'pnpm nx serve api'\" >&2\necho \"[Hook]   tmux new-session -d -s admin 'pnpm nx serve admin'\" >&2\necho '[Hook] Then: tmux attach -t api' >&2\nexit 1"
+            "command": "#!/bin/bash\necho '[Hook] BLOCKED: Dev server must run in tmux for log access' >&2\necho '[Hook] Use one of these instead:' >&2\necho \"[Hook]   tmux new-session -d -s api 'pnpm nx serve api'\" >&2\necho \"[Hook]   tmux new-session -d -s admin 'pnpm nx serve admin'\" >&2\necho '[Hook] Then: tmux attach -t api' >&2\necho '' >&2\nif ! command -v tmux >/dev/null 2>&1; then\n  echo '[Hook] tmux is not installed. Install it with:' >&2\n  echo '[Hook]   brew install tmux       (macOS)' >&2\n  echo '[Hook]   sudo apt install tmux   (Ubuntu/Debian)' >&2\nfi\nexit 1"
           }
         ],
         "description": "Block dev servers outside tmux — Nx serve/dev commands need persistent sessions"
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\necho '[Hook] BLOCKED: This monorepo uses pnpm as the package manager' >&2\necho '[Hook] Use: pnpm add <package>' >&2\necho '[Hook] Or:  pnpm install' >&2\nexit 1"
+            "command": "#!/bin/bash\ninput=$(cat)\ncmd=$(echo \"$input\" | jq -r '.tool_input.command // \"\"')\necho '[Hook] BLOCKED: This monorepo uses pnpm as the package manager' >&2\necho '' >&2\nif echo \"$cmd\" | grep -qE '(npm|yarn|bun) install$'; then\n  echo '[Hook] Equivalent: pnpm install' >&2\nelif echo \"$cmd\" | grep -qE '(npm|yarn|bun) (install|add) '; then\n  pkg=$(echo \"$cmd\" | sed -E 's/(npm|yarn|bun) (install|add) //')\n  echo \"[Hook] Equivalent: pnpm add $pkg\" >&2\nelif echo \"$cmd\" | grep -qE '(npm|yarn|bun) remove '; then\n  pkg=$(echo \"$cmd\" | sed -E 's/(npm|yarn|bun) remove //')\n  echo \"[Hook] Equivalent: pnpm remove $pkg\" >&2\nelse\n  echo '[Hook] Use: pnpm add <package>' >&2\n  echo '[Hook] Or:  pnpm install' >&2\nfi\nexit 1"
           }
         ],
         "description": "Enforce pnpm — block npm/yarn/bun install commands"
@@ -57,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\nfilename=$(basename \"$file_path\")\n\n# Check naming convention: YYYYMMDDHHMMSS_description.sql\nif ! echo \"$filename\" | grep -qE '^[0-9]{14}_[a-z_]+\\.sql$'; then\n  echo \"[Hook] WARNING: Migration naming convention mismatch\" >&2\n  echo \"[Hook] Expected: YYYYMMDDHHMMSS_description.sql\" >&2\n  echo \"[Hook] Got: $filename\" >&2\nfi\n\necho \"[Hook] Creating migration: $filename\" >&2\necho \"[Hook] Ensure it has both UP and DOWN sections\" >&2\necho \"[Hook] Use IF NOT EXISTS / IF EXISTS for idempotency\" >&2\necho \"$input\""
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\nfilename=$(basename \"$file_path\")\n\n# Check naming convention: YYYYMMDDHHMMSS_description.sql\nif ! echo \"$filename\" | grep -qE '^[0-9]{14}_[a-z_]+\\.sql$'; then\n  echo \"[Hook] WARNING: Migration naming convention mismatch\" >&2\n  echo \"[Hook] Expected: YYYYMMDDHHMMSS_description.sql\" >&2\n  echo \"[Hook] Got: $filename\" >&2\n  echo \"[Hook] Example: $(date +%Y%m%d%H%M%S)_add_users_table.sql\" >&2\nfi\n\necho \"[Hook] Creating migration: $filename\" >&2\necho \"[Hook] Ensure it has both UP and DOWN sections\" >&2\necho \"[Hook] Use IF NOT EXISTS / IF EXISTS for idempotency\" >&2\necho \"$input\""
           }
         ],
         "description": "Validate naming and warn about migration best practices"
@@ -193,6 +193,16 @@
           }
         ],
         "description": "Auto-format newly created JS/TS files with Prettier"
+      },
+      {
+        "matcher": "tool == \"Write\" && tool_input.file_path matches \"docs/features/.*\\\\.md$\" && !(tool_input.file_path matches \"INDEX\\\\.md$\")",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\n\nif [ -d \"docs/features\" ]; then\n  echo '# Feature Documentation Index' > docs/features/INDEX.md\n  echo '' >> docs/features/INDEX.md\n  echo '> Auto-generated. Do not edit manually.' >> docs/features/INDEX.md\n  echo '' >> docs/features/INDEX.md\n  echo '| Feature | File | Last Modified |' >> docs/features/INDEX.md\n  echo '|---------|------|---------------|' >> docs/features/INDEX.md\n  for f in docs/features/*.md; do\n    fname=$(basename \"$f\")\n    if [ \"$fname\" != \"INDEX.md\" ]; then\n      title=$(head -1 \"$f\" | sed 's/^# //')\n      mod=$(stat -f '%Sm' -t '%Y-%m-%d' \"$f\" 2>/dev/null || stat -c '%y' \"$f\" 2>/dev/null | cut -d' ' -f1)\n      echo \"| $title | [$fname]($fname) | $mod |\" >> docs/features/INDEX.md\n    fi\n  done\n  echo '[Hook] docs/features/INDEX.md regenerated' >&2\nfi\n\necho \"$input\""
+          }
+        ],
+        "description": "Auto-regenerate docs/features/INDEX.md when a new feature doc is created"
       }
     ],
     "Stop": [
@@ -225,6 +235,16 @@
           }
         ],
         "description": "Remind to create feature documentation if new files created without matching docs"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\n\nmkdir -p docs/session-logs\ntimestamp=$(date +%Y%m%d_%H%M%S)\nlog_file=\"docs/session-logs/session_${timestamp}.md\"\n\nmodified=$(git diff --name-only HEAD 2>/dev/null | wc -l | tr -d ' ')\nnew_files=$(git ls-files --others --exclude-standard 2>/dev/null | wc -l | tr -d ' ')\nbranch=$(git branch --show-current 2>/dev/null || echo 'unknown')\n\ncat > \"$log_file\" << LOGEOF\n# Session Summary — $(date '+%Y-%m-%d %H:%M')\n\n**Branch:** $branch\n**Files modified:** $modified\n**New files:** $new_files\n\n## Modified Files\n$(git diff --name-only HEAD 2>/dev/null || echo 'None')\n\n## Untracked Files\n$(git ls-files --others --exclude-standard 2>/dev/null || echo 'None')\nLOGEOF\n\necho \"[Hook] Session summary saved to $log_file\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Save session summary to docs/session-logs/ when session ends"
       }
     ]
   }

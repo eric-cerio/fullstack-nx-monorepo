@@ -1,0 +1,47 @@
+# Rule Overrides by Environment
+# Relax specific governance rules for non-production contexts.
+# Production profile enforces ALL rules at full strictness.
+
+profiles:
+  development:
+    description: "Local development — relaxed for speed"
+    rules:
+      testing:
+        coverage_threshold: 60
+        tdd_mandatory: false
+      coding_style:
+        max_file_lines: 1200
+        console_log_allowed: true
+      security:
+        rate_limiting: false
+      documentation:
+        feature_docs_mandatory: false
+    hooks:
+      disable:
+        - "console_log_warning"
+        - "feature_doc_reminder"
+
+  staging:
+    description: "Staging — moderate strictness"
+    rules:
+      testing:
+        coverage_threshold: 70
+        tdd_mandatory: true
+      coding_style:
+        max_file_lines: 800
+        console_log_allowed: false
+      security:
+        rate_limiting: true
+      documentation:
+        feature_docs_mandatory: true
+    hooks:
+      disable: []
+
+  production:
+    description: "Production — full governance enforcement"
+    rules: {}
+    hooks:
+      disable: []
+
+# Set your current environment
+active_profile: development

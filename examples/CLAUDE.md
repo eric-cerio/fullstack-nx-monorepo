@@ -111,6 +111,8 @@ pnpm nx reset                 # Clear Nx cache
 | `/migrate` | Create/review SQL migrations |
 | `/document-feature` | Create feature documentation |
 | `/update-docs` | Sync all documentation |
+| `/status` | Project health dashboard |
+| `/full-review` | Chained code + security + coverage review |
 
 ## Feature Implementation Workflow
 
