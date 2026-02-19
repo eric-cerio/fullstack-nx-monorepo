@@ -1,13 +1,14 @@
 # Testing Requirements
 
-## Minimum Coverage: 80% Per Nx Project
+## Minimum Coverage: 80% Per Workspace Package
 
-Test per project, not globally:
+Test per package, not globally:
+
 ```bash
-pnpm nx test api --coverage
-pnpm nx test admin --coverage
-pnpm nx test shared --coverage
-pnpm nx affected --target=test
+turbo test --filter=@my-org/api -- --coverage
+turbo test --filter=@my-org/admin -- --coverage
+turbo test --filter=@my-org/shared -- --coverage
+turbo test --filter=...[HEAD~1]
 ```
 
 ## Test Types (ALL required)
@@ -27,13 +28,13 @@ pnpm nx affected --target=test
 
 ## Agent Support
 
-- **tdd-guide** — TDD enforcement per Nx project
+- **tdd-guide** — TDD enforcement per workspace package
 - **e2e-runner** — Playwright E2E per app
 
 ## 100% Coverage Required For
 
 - Clerk auth guards
 - Role-based access checks
-- Shared utility functions in `libs/shared`
+- Shared utility functions in `packages/shared`
 - Database query functions
 - Migration rollback logic

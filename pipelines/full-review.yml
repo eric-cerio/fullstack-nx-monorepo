@@ -13,7 +13,7 @@ stages:
     required: true
     fail_on: critical
     checks:
-      - nx-boundaries
+      - module-boundaries
       - clerk-auth-guards
       - nestjs-patterns
       - nextjs-patterns

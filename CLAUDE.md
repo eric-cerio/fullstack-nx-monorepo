@@ -1,6 +1,6 @@
-# CLAUDE.md — Nx Fullstack Monorepo Governance Framework
+# CLAUDE.md — Turborepo Fullstack Monorepo Governance Framework
 
-This repository is a governance framework for AI-assisted fullstack Nx monorepo development. It is NOT an application — it is a collection of agents, rules, hooks, skills, and commands designed to be dropped into an Nx monorepo.
+This repository is a governance framework for AI-assisted fullstack Turborepo monorepo development. It is NOT an application — it is a collection of agents, rules, hooks, skills, and commands designed to be dropped into a Turborepo monorepo.
 
 ## Repository Structure
 
@@ -36,7 +36,7 @@ Environment-specific rule relaxation is configured in `config/overrides.yml`. Th
 
 ## Target Stack
 
-- **Monorepo**: Nx + pnpm
+- **Monorepo**: Turborepo + pnpm workspaces
 - **Frontend**: Next.js 15 + shadcn/ui + Tailwind CSS (multiple apps)
 - **Backend**: NestJS 11 REST API
 - **Auth**: Clerk (role-based: admin, partner, resident)
@@ -48,7 +48,7 @@ Environment-specific rule relaxation is configured in `config/overrides.yml`. Th
 
 ### Rules for Modifying Framework Files
 
-1. **Agents** (`agents/*.md`): Each agent has YAML frontmatter with `name`, `description`, `tools`, and `model`. Preserve this structure. Agents must reference specific Nx commands and Clerk patterns.
+1. **Agents** (`agents/*.md`): Each agent has YAML frontmatter with `name`, `description`, `tools`, and `model`. Preserve this structure. Agents must reference specific Turborepo commands and Clerk patterns.
 
 2. **Rules** (`rules/*.md`): Rules are prescriptive — they define MUST/MUST NOT requirements. Keep language imperative. Cross-reference other rules where relevant.
 
@@ -65,10 +65,10 @@ Environment-specific rule relaxation is configured in `config/overrides.yml`. Th
 ### Key Conventions
 
 - pnpm is the only allowed package manager
-- All code patterns assume Nx workspace with `apps/` and `libs/` directories
+- All code patterns assume Turborepo workspace with `apps/` and `packages/` directories
 - Clerk auth is assumed on every endpoint — guards are mandatory
 - TDD workflow is mandatory: RED → GREEN → REFACTOR
-- 80% test coverage minimum per Nx project (configurable via overrides)
+- 80% test coverage minimum per workspace package (configurable via overrides)
 - Conventional commits: `type(scope): description`
 - Feature docs go in `docs/features/` with an auto-generated INDEX.md
 - Session summaries auto-saved to `docs/session-logs/` on session end

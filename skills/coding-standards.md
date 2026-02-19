@@ -1,39 +1,39 @@
 ---
 name: coding-standards
-description: TypeScript coding standards for Nx monorepo. Covers path aliases, barrel exports, immutability, naming conventions, and shared library patterns.
+description: TypeScript coding standards for Turborepo monorepo. Covers path aliases, barrel exports, immutability, naming conventions, and shared package patterns.
 ---
 
-# Coding Standards for Nx Monorepo
+# Coding Standards for Turborepo Monorepo
 
 ## TypeScript Standards
 
-### Path Aliases (Nx)
+### Path Aliases
 ```typescript
-// ✅ GOOD: Use Nx path aliases
+// ✅ GOOD: Use workspace path aliases
 import { UserType } from '@shared/types'
 import { formatDate } from '@shared/utils'
 
-// ❌ BAD: Relative imports crossing project boundaries
-import { UserType } from '../../../libs/shared/src/types'
+// ❌ BAD: Relative imports crossing package boundaries
+import { UserType } from '../../../packages/shared/src/types'
 ```
 
 Path aliases defined in `tsconfig.base.json`:
 ```json
 {
   "paths": {
-    "@shared/*": ["libs/shared/src/*"]
+    "@shared/*": ["packages/shared/src/*"]
   }
 }
 ```
 
-### Barrel Exports (Shared Lib)
+### Barrel Exports (Shared Package)
 ```typescript
-// libs/shared/src/types/index.ts
+// packages/shared/src/types/index.ts
 export * from './user.types'
 export * from './api-response.types'
 export * from './roles.types'
 
-// libs/shared/src/index.ts (main entry)
+// packages/shared/src/index.ts (main entry)
 export * from './types'
 export * from './utils'
 export * from './constants'

@@ -40,7 +40,7 @@ git log --oneline -10 --name-only
 ```
 
 ### Step 2: Identify the Feature Scope
-- Which Nx projects were modified?
+- Which workspace packages were modified?
 - What's the user-facing functionality?
 - What API endpoints were created/changed?
 - What database changes were made?
@@ -68,12 +68,12 @@ Update `docs/features/INDEX.md` with the new entry.
 
 ## Architecture
 
-### Affected Nx Projects
-| Project | Role |
+### Affected Packages
+| Package | Role |
 |---------|------|
 | apps/admin | [what this app does for the feature] |
 | apps/api | [API endpoints involved] |
-| libs/shared | [shared types/utils used] |
+| packages/shared | [shared types/utils used] |
 
 ### Data Flow
 ```
@@ -89,7 +89,7 @@ Update `docs/features/INDEX.md` with the new entry.
 | `apps/api/src/modules/[module]/[module].service.ts` | Business logic |
 | `apps/api/src/modules/[module]/dto/[name].dto.ts` | Request validation |
 | `apps/admin/src/app/[page]/page.tsx` | Admin UI page |
-| `libs/shared/src/types/[name].types.ts` | Shared TypeScript types |
+| `packages/shared/src/types/[name].types.ts` | Shared TypeScript types |
 | `database/migrations/YYYYMMDD_[name].sql` | Database schema changes |
 
 ## API Endpoints
@@ -139,13 +139,13 @@ Update `docs/features/INDEX.md` with the new entry.
 ### How to Test
 ```bash
 # Unit tests
-pnpm nx test api --testPathPattern=[module]
+turbo test --filter=@my-org/api -- --testPathPattern=[module]
 
 # E2E tests
-pnpm nx e2e admin-e2e --grep "[feature]"
+turbo e2e --filter=@my-org/admin-e2e -- --grep "[feature]"
 
 # All affected tests
-pnpm nx affected --target=test
+turbo test --filter=...[HEAD~1]
 ```
 
 ### Test Files

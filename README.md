@@ -1,10 +1,10 @@
-# Nx Fullstack Monorepo — Claude Code Governance Framework
+# Turborepo Fullstack Monorepo — Claude Code Governance Framework
 
-A production-ready governance framework for managing fullstack Nx monorepos with AI-assisted development. This toolkit provides rules, agents, hooks, skills, and slash commands that integrate with [Claude Code](https://claude.ai/claude-code) to enforce architectural standards, automate quality checks, and streamline team workflows.
+A production-ready governance framework for managing fullstack Turborepo monorepos with AI-assisted development. This toolkit provides rules, agents, hooks, skills, and slash commands that integrate with [Claude Code](https://claude.ai/claude-code) to enforce architectural standards, automate quality checks, and streamline team workflows.
 
 ## What This Is
 
-This is **not** an application — it's a **framework and knowledge base** you drop into your Nx monorepo to get:
+This is **not** an application — it's a **framework and knowledge base** you drop into your Turborepo monorepo to get:
 
 - **12 specialized AI agents** for planning, reviewing, testing, and documenting
 - **13 slash commands** for common workflows (`/plan`, `/tdd`, `/code-review`, `/status`, etc.)
@@ -18,7 +18,7 @@ This is **not** an application — it's a **framework and knowledge base** you d
 
 | Layer | Technology |
 |-------|-----------|
-| Monorepo | Nx + pnpm |
+| Monorepo | Turborepo + pnpm workspaces |
 | Frontend | Next.js 15 + shadcn/ui + Tailwind CSS |
 | Backend | NestJS 11 REST API |
 | Auth | Clerk (role-based access control) |
@@ -31,7 +31,7 @@ This is **not** an application — it's a **framework and knowledge base** you d
 ### 1. Prerequisites
 
 - [Claude Code CLI](https://claude.ai/claude-code) installed and authenticated
-- An existing Nx monorepo (or create one with `npx create-nx-workspace`)
+- An existing Turborepo monorepo (or create one with `npx create-turbo`)
 - pnpm installed (`npm install -g pnpm`)
 
 ### 2. Install the Framework
@@ -39,7 +39,7 @@ This is **not** an application — it's a **framework and knowledge base** you d
 Use the init script to install automatically:
 
 ```bash
-# From your Nx monorepo root
+# From your Turborepo monorepo root
 bash <path-to-this-repo>/bin/init.sh .
 
 # Or preview first with dry run
@@ -48,7 +48,7 @@ bash <path-to-this-repo>/bin/init.sh --dry-run .
 
 The init script will:
 
-- Detect your Nx workspace
+- Detect your Turborepo workspace
 - Copy all framework directories (agents, rules, commands, skills, hooks)
 - Copy `config.yml` and `config/overrides.yml`
 - Create required directories (`docs/features/`, `docs/session-logs/`, `database/migrations/`)
@@ -79,8 +79,8 @@ bash bin/validate.sh
 Open Claude Code in your monorepo and use the slash commands:
 
 ```
-/plan          — Plan a new feature with Nx-aware dependency analysis
-/tdd           — Start test-driven development on a specific project
+/plan          — Plan a new feature with workspace-aware dependency analysis
+/tdd           — Start test-driven development on a specific package
 /code-review   — Review code for boundary violations, auth gaps, and style
 /status        — Project health dashboard
 /full-review   — Comprehensive code + security + coverage review
@@ -97,7 +97,7 @@ Open Claude Code in your monorepo and use the slash commands:
 │   ├── security-reviewer.md  # Security analysis (Sonnet)
 │   ├── build-error-resolver.md  # Build fixes (Haiku)
 │   ├── e2e-runner.md         # E2E testing (Sonnet)
-│   ├── nx-dependency-analyzer.md  # Dep graph (Opus)
+│   ├── dependency-analyzer.md   # Dep graph (Opus)
 │   ├── migration-reviewer.md # SQL migrations (Sonnet)
 │   ├── feature-documenter.md # Documentation (Opus)
 │   ├── status-reporter.md    # Health dashboard (Sonnet)
@@ -106,7 +106,7 @@ Open Claude Code in your monorepo and use the slash commands:
 ├── rules/            # 10 governance rule files
 │   ├── coding-style.md       # Code quality standards
 │   ├── git-workflow.md       # Conventional commits, PR process
-│   ├── nx-boundaries.md      # Module boundary enforcement
+│   ├── boundaries.md         # Module boundary enforcement
 │   ├── testing.md            # 80% coverage, TDD mandatory
 │   ├── performance.md        # Model selection, caching
 │   ├── patterns.md           # API response, DTO, pagination
@@ -123,7 +123,7 @@ Open Claude Code in your monorepo and use the slash commands:
 │   ├── e2e.md                # /e2e
 │   ├── test-coverage.md      # /test-coverage
 │   ├── refactor-clean.md     # /refactor-clean
-│   ├── nx-graph.md           # /nx-graph
+│   ├── dep-graph.md          # /dep-graph
 │   ├── migrate.md            # /migrate
 │   ├── document-feature.md   # /document-feature
 │   ├── update-docs.md        # /update-docs
@@ -131,7 +131,7 @@ Open Claude Code in your monorepo and use the slash commands:
 │   └── full-review.md        # /full-review
 │
 ├── skills/           # 7 technology pattern libraries
-│   ├── nx-monorepo-patterns.md
+│   ├── turborepo-patterns.md
 │   ├── nextjs-patterns.md
 │   ├── nestjs-patterns.md
 │   ├── clerk-auth-patterns.md
@@ -143,7 +143,7 @@ Open Claude Code in your monorepo and use the slash commands:
 │   └── hooks.json            # ~29 hooks (PreToolUse, PostToolUse, Stop)
 │
 ├── bin/              # Scripts
-│   ├── init.sh               # Install framework into Nx workspace
+│   ├── init.sh               # Install framework into Turborepo workspace
 │   └── validate.sh           # Validate framework consistency
 │
 ├── config.yml        # Framework configuration (stack, thresholds)
@@ -155,7 +155,7 @@ Open Claude Code in your monorepo and use the slash commands:
 │
 ├── examples/         # Reference files
 │   ├── CLAUDE.md             # Example CLAUDE.md for target projects
-│   └── minimal-workspace/    # Skeleton Nx workspace structure
+│   └── minimal-workspace/    # Skeleton Turborepo workspace structure
 │
 ├── docs/
 │   └── session-logs/         # Auto-generated session summaries
@@ -176,10 +176,10 @@ The framework enforces a structured workflow for every feature:
 
 | Step | Command | What Happens |
 |------|---------|-------------|
-| 1 | `/plan` | Planner agent analyzes the Nx graph, identifies affected projects, and creates a step-by-step plan |
+| 1 | `/plan` | Planner agent analyzes the workspace, identifies affected packages, and creates a step-by-step plan |
 | 2 | `/tdd` | TDD guide generates failing tests first (RED), then you implement (GREEN), then refactor (IMPROVE) |
 | 3 | implement | Write code following the plan — hooks auto-format, type-check, and warn in real-time |
-| 4 | `/code-review` | Reviewer checks Nx boundaries, Clerk guards, test coverage, and coding standards |
+| 4 | `/code-review` | Reviewer checks module boundaries, Clerk guards, test coverage, and coding standards |
 | 5 | `/document-feature` | Documenter creates living docs in `docs/features/` (INDEX.md auto-generated) |
 | 6 | commit | Conventional commit format: `feat(admin): add user management dashboard` |
 
@@ -187,14 +187,14 @@ The framework enforces a structured workflow for every feature:
 
 | Command | Description | Agent Model |
 |---------|-------------|------------|
-| `/plan` | Nx-aware implementation planning | Opus |
-| `/tdd` | Test-driven development per project | Sonnet |
+| `/plan` | Workspace-aware implementation planning | Opus |
+| `/tdd` | Test-driven development per package | Sonnet |
 | `/code-review` | Monorepo code review with auth checks | Sonnet |
-| `/build-fix` | Fix Nx build errors | Haiku |
+| `/build-fix` | Fix Turborepo build errors | Haiku |
 | `/e2e` | Generate/run Playwright E2E tests | Sonnet |
-| `/test-coverage` | Coverage analysis per Nx project | Sonnet |
+| `/test-coverage` | Coverage analysis per workspace package | Sonnet |
 | `/refactor-clean` | Dead code removal across monorepo | Sonnet |
-| `/nx-graph` | Analyze Nx dependency graph | Opus |
+| `/dep-graph` | Analyze workspace dependency graph | Opus |
 | `/migrate` | Create/review SQL migrations | Sonnet |
 | `/document-feature` | Create feature documentation | Opus |
 | `/update-docs` | Sync all documentation | Sonnet |
@@ -211,7 +211,7 @@ Hooks run automatically during Claude Code sessions to enforce standards:
 |------|----------|
 | Dev server outside tmux | **BLOCKED** — suggests `brew install tmux` if missing |
 | npm/yarn/bun install | **BLOCKED** — shows pnpm equivalent command |
-| Editing `libs/shared/` | **WARNING** — changes affect all apps |
+| Editing `packages/shared/` | **WARNING** — changes affect all apps |
 | Writing `.env` files | **BLOCKED** — use `.env.example` templates |
 | Destructive SQL (DROP, TRUNCATE) | **BLOCKED** — run manually if intentional |
 | Migration naming | **WARNING** — shows correct example with timestamp |
@@ -225,8 +225,8 @@ Hooks run automatically during Claude Code sessions to enforce standards:
 | Edit `.ts/.tsx/.js/.jsx` | Auto-format with Prettier |
 | Edit `.ts/.tsx` | TypeScript type-checking |
 | Edit source files | Warn about `console.log` |
-| Edit ESLint config | Remind to lint all projects |
-| Edit Nx config | Warn about cache invalidation |
+| Edit ESLint config | Remind to lint all packages |
+| Edit Turbo config | Warn about cache invalidation |
 | Edit migration files | Warn about editing applied migrations |
 | Edit auth files | Remind to test all Clerk roles |
 | Create feature doc | Auto-regenerate `docs/features/INDEX.md` |
@@ -332,16 +332,16 @@ model: sonnet
 
 ### Example Workspace
 
-See [examples/minimal-workspace/](examples/minimal-workspace/) for a skeleton Nx workspace showing the expected directory structure with `project.json` files, path aliases, and tags.
+See [examples/minimal-workspace/](examples/minimal-workspace/) for a skeleton Turborepo workspace showing the expected directory structure with `package.json` files per package, `turbo.json` pipeline config, and workspace dependencies.
 
 ## Key Rules Summary
 
 | Rule | Requirement |
 |------|------------|
-| Module boundaries | Apps cannot import from other apps; use `libs/shared` |
+| Module boundaries | Apps cannot import from other apps; use `packages/shared` |
 | Auth guards | Every NestJS endpoint needs `ClerkAuthGuard` + `RolesGuard` |
 | Package manager | pnpm only (enforced by hooks) |
-| Test coverage | 80% minimum per Nx project (configurable) |
+| Test coverage | 80% minimum per workspace package (configurable) |
 | TDD | Mandatory for new features (configurable per environment) |
 | File size | < 800 lines per file, < 50 lines per function |
 | Types | No `any` — use proper TypeScript types |

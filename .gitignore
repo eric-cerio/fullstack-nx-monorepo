@@ -18,9 +18,8 @@ tmp/
 .env.local
 .env.*.local
 
-# Nx
-.nx/cache
-.nx/workspace-data
+# Turborepo
+.turbo/
 
 # Session logs (local only)
 docs/session-logs/*.md

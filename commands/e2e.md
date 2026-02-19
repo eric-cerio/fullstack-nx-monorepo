@@ -11,7 +11,7 @@ Invokes the **e2e-runner** agent for Playwright E2E testing per app.
 1. Identify target app (admin, partner, or resident)
 2. Generate Playwright tests using Page Object Model
 3. Mock Clerk authentication for the target role
-4. Run tests: `pnpm nx e2e <app>-e2e`
+4. Run tests: `turbo e2e --filter=@my-org/<app>-e2e`
 5. Capture artifacts (screenshots, videos, traces)
 6. Test cross-role access denial
 
@@ -26,13 +26,13 @@ Invokes the **e2e-runner** agent for Playwright E2E testing per app.
 ## Commands
 
 ```bash
-pnpm nx e2e admin-e2e
-pnpm nx e2e partner-e2e
-pnpm nx e2e resident-e2e
-pnpm nx e2e admin-e2e --headed
-pnpm nx affected --target=e2e
+turbo e2e --filter=@my-org/admin-e2e
+turbo e2e --filter=@my-org/partner-e2e
+turbo e2e --filter=@my-org/resident-e2e
+turbo e2e --filter=@my-org/admin-e2e -- --headed
+turbo e2e --filter=...[HEAD~1]
 ```
 
 ## Related Agent
 
-`~/.claude/agents/e2e-runner.md`
+`agents/e2e-runner.md`

@@ -26,20 +26,20 @@ Automatically runs on commit:
 
 ## Feature Workflow
 
-1. **Plan First** — Use `/plan` to identify affected Nx projects
+1. **Plan First** — Use `/plan` to identify affected workspace packages
 2. **TDD** — Use `/tdd` per affected project
 3. **Code Review** — Use `/code-review` after implementation
 4. **Document** — Use `/document-feature` to create feature docs
-5. **Build Check** — `pnpm nx affected --target=build`
+5. **Build Check** — `turbo build --filter=...[HEAD~1]`
 6. **Commit** — Conventional commits with scope
 
-## CI with Nx Affected
+## CI with Turborepo Filtering
 
 ```bash
 # Only run what changed (for CI)
-pnpm nx affected --target=lint --base=main
-pnpm nx affected --target=test --base=main
-pnpm nx affected --target=build --base=main
+turbo lint --filter=...[origin/main]
+turbo test --filter=...[origin/main]
+turbo build --filter=...[origin/main]
 ```
 
 ## Pull Request Requirements

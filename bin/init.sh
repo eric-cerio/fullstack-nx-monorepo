@@ -14,14 +14,14 @@ NC='\033[0m'
 usage() {
   echo "Usage: bash bin/init.sh [OPTIONS] <target-directory>"
   echo ""
-  echo "Install the governance framework into an Nx monorepo."
+  echo "Install the governance framework into a Turborepo monorepo."
   echo ""
   echo "Options:"
   echo "  --dry-run    Preview actions without making changes"
   echo "  --help       Show this help message"
   echo ""
   echo "Examples:"
-  echo "  bash bin/init.sh /path/to/my-nx-workspace"
+  echo "  bash bin/init.sh /path/to/my-turborepo-workspace"
   echo "  bash bin/init.sh --dry-run ."
 }
 
@@ -57,7 +57,7 @@ fi
 
 TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
 
-echo "=== Nx Governance Framework Installer ==="
+echo "=== Turborepo Governance Framework Installer ==="
 echo "Framework source: $SCRIPT_DIR"
 echo "Target workspace: $TARGET_DIR"
 if [ "$DRY_RUN" = true ]; then
@@ -65,14 +65,14 @@ if [ "$DRY_RUN" = true ]; then
 fi
 echo ""
 
-# 1. Detect Nx workspace
-if [ ! -f "$TARGET_DIR/nx.json" ]; then
-  log_err "nx.json not found in $TARGET_DIR"
-  echo "    This script must be run against an Nx workspace root."
-  echo "    Create one with: npx create-nx-workspace"
+# 1. Detect Turborepo workspace
+if [ ! -f "$TARGET_DIR/turbo.json" ]; then
+  log_err "turbo.json not found in $TARGET_DIR"
+  echo "    This script must be run against a Turborepo workspace root."
+  echo "    Create one with: npx create-turbo"
   exit 1
 fi
-log_ok "Nx workspace detected"
+log_ok "Turborepo workspace detected"
 
 # 2. Check package manager
 if [ -f "$TARGET_DIR/pnpm-lock.yaml" ]; then

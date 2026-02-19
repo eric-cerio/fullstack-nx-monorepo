@@ -1,27 +1,27 @@
 ---
-description: Incrementally fix Nx build and TypeScript errors. Uses pnpm nx build, handles tsconfig paths, module boundaries, and NestJS/Next.js specific errors. Minimal diffs only.
+description: Incrementally fix build and TypeScript errors. Uses turbo build, handles tsconfig paths, module boundaries, and NestJS/Next.js specific errors. Minimal diffs only.
 ---
 
 # Build Fix Command
 
-Invokes the **build-error-resolver** agent to fix Nx build errors.
+Invokes the **build-error-resolver** agent to fix build errors.
 
 ## What This Command Does
 
-1. Run `pnpm nx build <project>` or `pnpm nx run-many --target=build`
-2. Parse error output and group by Nx project
+1. Run `turbo build --filter=<package>` or `turbo build`
+2. Parse error output and group by workspace package
 3. Fix one error at a time with minimal changes
 4. Re-run build after each fix
-5. Verify with `pnpm nx affected --target=build`
+5. Verify with `turbo build --filter=...[HEAD~1]`
 
 ## Common Fix Targets
 
 ```bash
-pnpm nx build admin            # Next.js admin build
-pnpm nx build api              # NestJS API build
-pnpm nx build shared           # Shared lib build
-pnpm nx run-many --target=build # All projects
-pnpm nx reset                  # Clear Nx cache if stale
+turbo build --filter=@my-org/admin    # Next.js admin build
+turbo build --filter=@my-org/api      # NestJS API build
+turbo build --filter=@my-org/shared   # Shared package build
+turbo build                           # All packages
+turbo daemon clean && rm -rf .turbo   # Clear cache if stale
 ```
 
 ## Stop Conditions
@@ -32,4 +32,4 @@ pnpm nx reset                  # Clear Nx cache if stale
 
 ## Related Agent
 
-`~/.claude/agents/build-error-resolver.md`
+`agents/build-error-resolver.md`

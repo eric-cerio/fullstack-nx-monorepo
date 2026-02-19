@@ -2,7 +2,7 @@
 version: "1.0.0"
 
 stack:
-  monorepo: nx
+  monorepo: turborepo
   package_manager: pnpm
   frontend: nextjs-15
   backend: nestjs-11

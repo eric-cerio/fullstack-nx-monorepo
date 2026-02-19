@@ -1,5 +1,5 @@
 ---
-description: Safely identify and remove dead code across the Nx monorepo with test verification. Uses knip, depcheck, and Nx dependency analysis.
+description: Safely identify and remove dead code across the Turborepo monorepo with test verification. Uses knip, depcheck, and dependency analysis.
 ---
 
 # Refactor Clean Command
@@ -8,18 +8,18 @@ Safely identify and remove dead code across the monorepo.
 
 ## What This Command Does
 
-1. Run dead code analysis tools per Nx project:
+1. Run dead code analysis tools per workspace package:
    - `knip` — unused exports and files
    - `depcheck` — unused dependencies
-   - Nx graph — orphaned projects
+   - Dependency analysis — orphaned packages
 
 2. Categorize by risk:
    - SAFE: Unused utilities, test helpers
-   - CAUTION: Shared lib exports (might be used by other apps)
+   - CAUTION: Shared package exports (might be used by other apps)
    - DANGER: Config files, NestJS modules, middleware
 
 3. Before each deletion:
-   - Run `pnpm nx affected --target=test`
+   - Run `turbo test --filter=...[HEAD~1]`
    - Verify tests pass
    - Apply change
    - Re-run tests
@@ -27,4 +27,4 @@ Safely identify and remove dead code across the monorepo.
 
 4. Show summary of cleaned items
 
-Never delete shared lib exports without checking ALL consuming apps!
+Never delete shared package exports without checking ALL consuming apps!

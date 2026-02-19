@@ -3,14 +3,14 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "tool == \"Bash\" && tool_input.command matches \"(pnpm( run)? dev|nx serve|nx dev|nx run .+:serve|nx run .+:dev)\"",
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(pnpm( run)? dev|turbo dev|turbo run dev)\"",
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\necho '[Hook] BLOCKED: Dev server must run in tmux for log access' >&2\necho '[Hook] Use one of these instead:' >&2\necho \"[Hook]   tmux new-session -d -s api 'pnpm nx serve api'\" >&2\necho \"[Hook]   tmux new-session -d -s admin 'pnpm nx serve admin'\" >&2\necho '[Hook] Then: tmux attach -t api' >&2\necho '' >&2\nif ! command -v tmux >/dev/null 2>&1; then\n  echo '[Hook] tmux is not installed. Install it with:' >&2\n  echo '[Hook]   brew install tmux       (macOS)' >&2\n  echo '[Hook]   sudo apt install tmux   (Ubuntu/Debian)' >&2\nfi\nexit 1"
+            "command": "#!/bin/bash\necho '[Hook] BLOCKED: Dev server must run in tmux for log access' >&2\necho '[Hook] Use one of these instead:' >&2\necho \"[Hook]   tmux new-session -d -s api 'turbo dev --filter=@my-org/api'\" >&2\necho \"[Hook]   tmux new-session -d -s admin 'turbo dev --filter=@my-org/admin'\" >&2\necho '[Hook] Then: tmux attach -t api' >&2\necho '' >&2\nif ! command -v tmux >/dev/null 2>&1; then\n  echo '[Hook] tmux is not installed. Install it with:' >&2\n  echo '[Hook]   brew install tmux       (macOS)' >&2\n  echo '[Hook]   sudo apt install tmux   (Ubuntu/Debian)' >&2\nfi\nexit 1"
           }
         ],
-        "description": "Block dev servers outside tmux — Nx serve/dev commands need persistent sessions"
+        "description": "Block dev servers outside tmux — turbo dev commands need persistent sessions"
       },
       {
         "matcher": "tool == \"Bash\" && tool_input.command matches \"(npm install|npm add|yarn add|yarn install|bun install|bun add)\"",
@@ -83,24 +83,24 @@
         "description": "Block writing to .env files (allow .env.example)"
       },
       {
-        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"libs/shared/\"",
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"packages/shared/\"",
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] CAUTION: Editing shared library code\" >&2\necho \"[Hook] File: $file_path\" >&2\necho \"[Hook] Changes here affect ALL apps (admin, partner, resident, api)\" >&2\necho \"[Hook] Run 'pnpm nx affected --target=test' after changes\" >&2\necho \"$input\""
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] CAUTION: Editing shared package code\" >&2\necho \"[Hook] File: $file_path\" >&2\necho \"[Hook] Changes here affect ALL apps (admin, partner, resident, api)\" >&2\necho \"[Hook] Run 'turbo test --filter=...[HEAD~1]' after changes\" >&2\necho \"$input\""
           }
         ],
-        "description": "Warn when editing shared libraries — changes ripple across all apps"
+        "description": "Warn when editing shared packages — changes ripple across all apps"
       },
       {
-        "matcher": "tool == \"Bash\" && tool_input.command matches \"nx run-many\"",
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"turbo (build|test|lint|e2e)($| )\"",
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\ninput=$(cat)\nif [ -z \"$TMUX\" ]; then\n  echo '[Hook] nx run-many can take a while — consider using tmux' >&2\nfi\necho \"$input\""
+            "command": "#!/bin/bash\ninput=$(cat)\nif [ -z \"$TMUX\" ]; then\n  echo '[Hook] turbo tasks across all packages can take a while — consider using tmux' >&2\nfi\necho \"$input\""
           }
         ],
-        "description": "Warn about long-running nx run-many commands"
+        "description": "Warn about long-running turbo multi-package commands"
       }
     ],
     "PostToolUse": [
@@ -149,20 +149,20 @@
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\ninput=$(cat)\necho \"[Hook] ESLint config changed — run 'pnpm nx run-many --target=lint' to validate\" >&2\necho \"[Hook] Check @nx/enforce-module-boundaries rules\" >&2\necho \"$input\""
+            "command": "#!/bin/bash\ninput=$(cat)\necho \"[Hook] ESLint config changed — run 'turbo lint' to validate\" >&2\necho \"[Hook] Check eslint-plugin-boundaries rules\" >&2\necho \"$input\""
           }
         ],
         "description": "Remind to lint all projects and check module boundaries after ESLint changes"
       },
       {
-        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"(nx\\\\.json|project\\\\.json|tsconfig\\\\.base\\\\.json)\"",
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"(turbo\\\\.json|tsconfig\\\\.base\\\\.json)\"",
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] Nx config changed: $file_path\" >&2\necho \"[Hook] Run 'pnpm nx reset' if you experience caching issues\" >&2\necho \"[Hook] Run 'pnpm nx graph' to verify dependency graph\" >&2\necho \"$input\""
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] Turbo config changed: $file_path\" >&2\necho \"[Hook] Run 'turbo daemon clean && rm -rf .turbo' if you experience caching issues\" >&2\necho \"[Hook] Run 'turbo ls' to verify workspace packages\" >&2\necho \"$input\""
           }
         ],
-        "description": "Warn about Nx config changes — may need cache reset"
+        "description": "Warn about Turbo config changes — may need cache reset"
       },
       {
         "matcher": "tool == \"Edit\" && tool_input.file_path matches \"database/migrations/\"",
@@ -221,10 +221,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\ninput=$(cat)\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  modified_files=$(git diff --name-only HEAD 2>/dev/null || true)\n  \n  # Check for .env leaks\n  has_env=false\n  while IFS= read -r file; do\n    if echo \"$file\" | grep -qE '\\.env$|\\.env\\.local$|\\.env\\.production$'; then\n      echo \"[Hook] DANGER: .env file modified: $file\" >&2\n      has_env=true\n    fi\n  done <<< \"$modified_files\"\n  \n  if [ \"$has_env\" = true ]; then\n    echo \"[Hook] DO NOT commit .env files — check .gitignore\" >&2\n  fi\n  \n  # Check for Nx config changes\n  nx_affected=$(echo \"$modified_files\" | grep -E '(nx\\.json|project\\.json|tsconfig\\.base\\.json)' || true)\n  if [ -n \"$nx_affected\" ]; then\n    echo \"[Hook] Nx config files were modified — run 'pnpm nx affected --target=build' before pushing\" >&2\n  fi\nfi\n\necho \"$input\""
+            "command": "#!/bin/bash\ninput=$(cat)\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  modified_files=$(git diff --name-only HEAD 2>/dev/null || true)\n  \n  # Check for .env leaks\n  has_env=false\n  while IFS= read -r file; do\n    if echo \"$file\" | grep -qE '\\.env$|\\.env\\.local$|\\.env\\.production$'; then\n      echo \"[Hook] DANGER: .env file modified: $file\" >&2\n      has_env=true\n    fi\n  done <<< \"$modified_files\"\n  \n  if [ \"$has_env\" = true ]; then\n    echo \"[Hook] DO NOT commit .env files — check .gitignore\" >&2\n  fi\n  \n  # Check for Turbo config changes\n  turbo_affected=$(echo \"$modified_files\" | grep -E '(turbo\\.json|tsconfig\\.base\\.json)' || true)\n  if [ -n \"$turbo_affected\" ]; then\n    echo \"[Hook] Turbo config files were modified — run 'turbo build --filter=...[HEAD~1]' before pushing\" >&2\n  fi\nfi\n\necho \"$input\""
           }
         ],
-        "description": "Final audit for .env leaks and Nx config changes"
+        "description": "Final audit for .env leaks and Turbo config changes"
       },
       {
         "matcher": "*",

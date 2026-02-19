@@ -1,6 +1,6 @@
 ---
 name: clerk-auth-patterns
-description: Clerk authentication patterns for multi-app Nx monorepo. Covers middleware per app, role-based access via sessionClaims.metadata.role, NestJS JWT verification, and cross-app auth strategy.
+description: Clerk authentication patterns for multi-app Turborepo monorepo. Covers middleware per app, role-based access via sessionClaims.metadata.role, NestJS JWT verification, and cross-app auth strategy.
 ---
 
 # Clerk Auth Patterns
@@ -174,7 +174,7 @@ export class WebhookController {
 ## Shared Role Types
 
 ```typescript
-// libs/shared/src/types/roles.types.ts
+// packages/shared/src/types/roles.types.ts
 export type UserRole = 'admin' | 'partner' | 'resident'
 
 export const ROLES = {

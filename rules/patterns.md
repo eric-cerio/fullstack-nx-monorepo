@@ -3,7 +3,7 @@
 ## API Response Format (Shared Type)
 
 ```typescript
-// libs/shared/src/types/api-response.types.ts
+// packages/shared/src/types/api-response.types.ts
 interface ApiResponse<T> {
   success: boolean
   data?: T
@@ -51,7 +51,7 @@ interface UserRepository {
 ## Pagination Pattern
 
 ```typescript
-// libs/shared/src/types/pagination.types.ts
+// packages/shared/src/types/pagination.types.ts
 export class PaginationDto {
   @IsOptional()
   @IsInt()

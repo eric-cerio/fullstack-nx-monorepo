@@ -3,44 +3,50 @@
 ## Model Selection Strategy
 
 **Haiku 4.5** (Fast, cost-effective):
-- Lightweight per-project agents
+
+- Lightweight per-package agents
 - Pair programming and code generation
 - Simple file edits
 
 **Sonnet 4.6** (Best coding):
+
 - Main development work
 - Orchestrating multi-agent workflows
 - Complex feature implementation
 
 **Opus 4.6** (Deepest reasoning):
+
 - Architectural decisions for monorepo
 - Complex cross-app refactoring
 - Security reviews
 
-## Nx Caching
+## Turborepo Caching
 
-Leverage Nx caching to avoid redundant work:
+Leverage Turborepo caching to avoid redundant work:
+
 ```bash
-pnpm nx affected --target=test    # Only test what changed
-pnpm nx affected --target=build   # Only build what changed
-pnpm nx reset                     # Clear stale cache
+turbo test --filter=...[HEAD~1]    # Only test what changed
+turbo build --filter=...[HEAD~1]   # Only build what changed
+turbo daemon clean && rm -rf .turbo  # Clear stale cache
 ```
 
 ## Context Window Management
 
 Avoid last 20% of context window for:
+
 - Large-scale cross-app refactoring
 - Full monorepo analysis
 - Multi-file feature implementation
 
 Lower context sensitivity:
-- Single-project edits
+
+- Single-package edits
 - Migration file creation
 - Documentation updates
 
 ## Build Troubleshooting
 
 1. Use **build-error-resolver** agent
-2. Start with `pnpm nx reset` to clear cache
-3. Then `pnpm nx build <project>` for specific project
-4. Then `pnpm nx affected --target=build` for ripple effects
+2. Start with `turbo daemon clean` to clear cache
+3. Then `turbo build --filter=<package>` for specific package
+4. Then `turbo build --filter=...[HEAD~1]` for ripple effects

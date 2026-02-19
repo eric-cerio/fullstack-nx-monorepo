@@ -1,6 +1,6 @@
 ---
 name: shadcn-tailwind-patterns
-description: shadcn/ui component customization and Tailwind CSS patterns for multi-app Nx monorepo. Covers per-app UI setup, design system consistency, and theming.
+description: shadcn/ui component customization and Tailwind CSS patterns for multi-app Turborepo monorepo. Covers per-app UI setup, design system consistency, and theming.
 ---
 
 # shadcn/ui + Tailwind CSS Patterns
@@ -44,7 +44,7 @@ const config: Config = {
   content: [
     './src/**/*.{ts,tsx}',
     // Include shared components if needed
-    '../../libs/shared/src/**/*.{ts,tsx}',
+    '../../packages/shared/src/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
@@ -132,10 +132,10 @@ To keep consistent theming across apps, define shared CSS variables:
 
 ## Shared Patterns (NOT Shared Components)
 
-Don't share shadcn/ui components across apps via `libs/shared`. Instead, share:
-- **Types**: `libs/shared/src/types/` — shared data types
-- **Utils**: `libs/shared/src/utils/` — formatting, validation
-- **Constants**: `libs/shared/src/constants/` — shared config values
+Don't share shadcn/ui components across apps via `packages/shared`. Instead, share:
+- **Types**: `packages/shared/src/types/` — shared data types
+- **Utils**: `packages/shared/src/utils/` — formatting, validation
+- **Constants**: `packages/shared/src/constants/` — shared config values
 
 Each app owns its own UI components to allow independent customization.
 
