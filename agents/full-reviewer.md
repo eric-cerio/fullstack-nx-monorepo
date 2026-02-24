@@ -144,4 +144,43 @@ Check:
 - **BLOCK**: Any CRITICAL finding in any stage
 - **WARN**: HIGH findings only (no CRITICAL) OR coverage within 10% of threshold
 
+## Stage 4: Mobile Review (Conditional)
+
+**Run only if** files in `apps/mobile/` were changed.
+
+Execute the mobile-specialist checklist:
+
+### React Native / Expo
+
+- Secure token storage (expo-secure-store, NOT AsyncStorage)
+- Navigation structure (Expo Router, deep links)
+- Platform-specific code (iOS/Android handling)
+- Expo config production readiness (app.json, eas.json)
+- Offline-first patterns for critical data
+- Push notification permission handling
+- QR scanning implementation (expo-camera)
+- Performance (FlatList optimization, memo usage)
+- Accessibility (screen reader, touch targets)
+
+Collect all findings with severity levels.
+
+## Stage 5: Real-Time Review (Conditional)
+
+**Run only if** files matching `*gateway*`, `*socket*`, or `*redis*` were changed.
+
+Execute the realtime-architect checklist:
+
+### WebSocket + Redis
+
+- Auth on WebSocket connection (JWT handshake verification)
+- Event naming convention (`domain:action`)
+- Room management (join/leave, room-level access control)
+- Vote/upvote deduplication (Redis keys)
+- Redis pub/sub adapter for horizontal scaling
+- Connection lifecycle (reconnection, cleanup)
+- Rate limiting on client-to-server events
+- Cache invalidation on data mutations
+
+Collect all findings with severity levels.
+
 Always end with clear action items for any non-APPROVE verdict.

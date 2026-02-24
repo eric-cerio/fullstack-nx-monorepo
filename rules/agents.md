@@ -16,6 +16,10 @@
 | feature-documenter | Living feature documentation | After EVERY feature (MANDATORY) |
 | status-reporter | Project health dashboard | Sprint checks, pre-release compliance |
 | full-reviewer | Chained review pipeline | Before merging PRs, after major features |
+| mobile-specialist | React Native/Expo expert review | Mobile app code, Expo config, navigation, secure storage |
+| realtime-architect | WebSocket + Redis real-time review | Gateway files, socket events, Redis pub/sub, room management |
+| database-architect | PostgreSQL + Redis data layer review | Schema design, migrations, query performance, caching strategy |
+| api-designer | REST API design + multi-role review | Endpoint structure, DTOs, pagination, error responses, role access |
 
 ## Mandatory Agent Usage
 

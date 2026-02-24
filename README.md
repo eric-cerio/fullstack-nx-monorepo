@@ -6,10 +6,10 @@ A production-ready governance framework for managing fullstack Turborepo monorep
 
 This is **not** an application — it's a **framework and knowledge base** you drop into your Turborepo monorepo to get:
 
-- **12 specialized AI agents** for planning, reviewing, testing, and documenting
-- **13 slash commands** for common workflows (`/plan`, `/tdd`, `/code-review`, `/status`, etc.)
-- **~29 automation hooks** that enforce standards in real-time
-- **7 technology skill guides** covering NestJS, Next.js, Clerk, and more
+- **16 specialized AI agents** for planning, reviewing, testing, mobile, real-time, and database architecture
+- **17 slash commands** for common workflows (`/plan`, `/tdd`, `/code-review`, `/mobile-review`, `/db-review`, etc.)
+- **~35 automation hooks** that enforce standards in real-time
+- **12 technology skill guides** covering NestJS, Next.js, React Native, JWT, PostgreSQL, Redis, WebSocket, and more
 - **10 governance rules** for code style, security, testing, and architecture
 - **Configurable thresholds** with environment-based overrides
 - **Agent chaining pipelines** for comprehensive review workflows
@@ -19,10 +19,13 @@ This is **not** an application — it's a **framework and knowledge base** you d
 | Layer | Technology |
 |-------|-----------|
 | Monorepo | Turborepo + pnpm workspaces |
-| Frontend | Next.js 15 + shadcn/ui + Tailwind CSS |
-| Backend | NestJS 11 REST API |
-| Auth | Clerk (role-based access control) |
-| Database | SQL with migration files |
+| Frontend | Next.js 15 + shadcn/ui + Tailwind CSS (Landing Page + CMS) |
+| Mobile | React Native (Expo) for iOS/Android |
+| Backend | NestJS 11 REST API + WebSocket Gateway |
+| Auth | JWT (provider-agnostic, 6 roles, access + refresh tokens) |
+| Database | PostgreSQL + TypeORM + timestamp-named migrations |
+| Cache | Redis (cache-aside, sessions, pub/sub) |
+| Real-Time | WebSockets (Socket.io + Redis adapter) |
 | Testing | Jest + Playwright |
 | Linting | ESLint 9 flat config + Prettier |
 
@@ -89,7 +92,7 @@ Open Claude Code in your monorepo and use the slash commands:
 ## Project Structure
 
 ```
-├── agents/           # 12 AI agent prompt templates
+├── agents/           # 16 AI agent prompt templates
 │   ├── planner.md            # Feature planning (Opus)
 │   ├── architect.md          # System design (Opus)
 │   ├── tdd-guide.md          # TDD enforcement (Sonnet)
@@ -101,7 +104,11 @@ Open Claude Code in your monorepo and use the slash commands:
 │   ├── migration-reviewer.md # SQL migrations (Sonnet)
 │   ├── feature-documenter.md # Documentation (Opus)
 │   ├── status-reporter.md    # Health dashboard (Sonnet)
-│   └── full-reviewer.md      # Chained pipeline (Opus)
+│   ├── full-reviewer.md      # Chained pipeline (Opus)
+│   ├── mobile-specialist.md  # React Native/Expo expert (Opus)
+│   ├── realtime-architect.md # WebSocket + Redis expert (Opus)
+│   ├── database-architect.md # PostgreSQL + Redis expert (Opus)
+│   └── api-designer.md       # REST API design expert (Opus)
 │
 ├── rules/            # 10 governance rule files
 │   ├── coding-style.md       # Code quality standards
@@ -115,7 +122,7 @@ Open Claude Code in your monorepo and use the slash commands:
 │   ├── agents.md             # Agent orchestration workflow
 │   └── hooks.md              # Hook types and descriptions
 │
-├── commands/         # 13 slash command definitions
+├── commands/         # 17 slash command definitions
 │   ├── plan.md               # /plan
 │   ├── tdd.md                # /tdd
 │   ├── code-review.md        # /code-review
@@ -128,19 +135,28 @@ Open Claude Code in your monorepo and use the slash commands:
 │   ├── document-feature.md   # /document-feature
 │   ├── update-docs.md        # /update-docs
 │   ├── status.md             # /status
-│   └── full-review.md        # /full-review
+│   ├── full-review.md        # /full-review
+│   ├── mobile-review.md      # /mobile-review
+│   ├── api-design.md         # /api-design
+│   ├── realtime-review.md    # /realtime-review
+│   └── db-review.md          # /db-review
 │
-├── skills/           # 7 technology pattern libraries
+├── skills/           # 12 technology pattern libraries
 │   ├── turborepo-patterns.md
 │   ├── nextjs-patterns.md
 │   ├── nestjs-patterns.md
 │   ├── clerk-auth-patterns.md
 │   ├── shadcn-tailwind-patterns.md
 │   ├── sql-migration-patterns.md
-│   └── coding-standards.md
+│   ├── coding-standards.md
+│   ├── react-native-expo-patterns.md
+│   ├── jwt-auth-patterns.md
+│   ├── postgresql-patterns.md
+│   ├── redis-patterns.md
+│   └── websocket-patterns.md
 │
 ├── hooks/            # Claude Code hook definitions
-│   └── hooks.json            # ~29 hooks (PreToolUse, PostToolUse, Stop)
+│   └── hooks.json            # ~35 hooks (PreToolUse, PostToolUse, Stop)
 │
 ├── bin/              # Scripts
 │   ├── init.sh               # Install framework into Turborepo workspace
@@ -200,6 +216,10 @@ The framework enforces a structured workflow for every feature:
 | `/update-docs` | Sync all documentation | Sonnet |
 | `/status` | Project health dashboard | Sonnet |
 | `/full-review` | Chained code + security + coverage review | Opus |
+| `/mobile-review` | React Native/Expo code review | Opus |
+| `/api-design` | REST API endpoint design and review | Opus |
+| `/realtime-review` | WebSocket + Redis real-time review | Opus |
+| `/db-review` | Database schema, query, and migration review | Opus |
 
 ## Hooks System
 
@@ -211,7 +231,9 @@ Hooks run automatically during Claude Code sessions to enforce standards:
 |------|----------|
 | Dev server outside tmux | **BLOCKED** — suggests `brew install tmux` if missing |
 | npm/yarn/bun install | **BLOCKED** — shows pnpm equivalent command |
-| Editing `packages/shared/` | **WARNING** — changes affect all apps |
+| Editing `packages/shared/` | **WARNING** — changes affect all apps (web AND mobile) |
+| Editing Expo config (`app.json`/`eas.json`) | **WARNING** — verify bundle ID, version, permissions |
+| SQL queries in controllers | **WARNING** — must go through service layer |
 | Writing `.env` files | **BLOCKED** — use `.env.example` templates |
 | Destructive SQL (DROP, TRUNCATE) | **BLOCKED** — run manually if intentional |
 | Migration naming | **WARNING** — shows correct example with timestamp |
@@ -228,7 +250,9 @@ Hooks run automatically during Claude Code sessions to enforce standards:
 | Edit ESLint config | Remind to lint all packages |
 | Edit Turbo config | Warn about cache invalidation |
 | Edit migration files | Warn about editing applied migrations |
-| Edit auth files | Remind to test all Clerk roles |
+| Edit auth files | Remind to test all 6 roles |
+| Edit data mutation services | Remind about Redis cache invalidation |
+| Edit WebSocket gateway files | Remind about event naming conventions + JWT auth |
 | Create feature doc | Auto-regenerate `docs/features/INDEX.md` |
 
 ### Stop (Session End)
@@ -247,11 +271,15 @@ Hooks run automatically during Claude Code sessions to enforce standards:
 Central configuration for stack, thresholds, and conventions:
 
 ```yaml
-version: "1.0.0"
+version: "1.2.0"
 stack:
-  auth_provider: clerk
+  auth_provider: jwt
   frontend: nextjs-15
   backend: nestjs-11
+  mobile: react-native-expo
+  database: postgresql
+  cache: redis
+  realtime: websockets
 thresholds:
   test_coverage: 80
   max_file_lines: 800
@@ -295,10 +323,12 @@ Current version is defined in `config.yml` under the `version` field.
 
 ### Adapting to Your Stack
 
-1. **Different auth provider?** — Edit [skills/clerk-auth-patterns.md](skills/clerk-auth-patterns.md) and [rules/security.md](rules/security.md)
+1. **Different auth provider?** — Edit [skills/jwt-auth-patterns.md](skills/jwt-auth-patterns.md) and [rules/security.md](rules/security.md)
 2. **Different frontend?** — Edit [skills/nextjs-patterns.md](skills/nextjs-patterns.md) and update app structure in [examples/CLAUDE.md](examples/CLAUDE.md)
 3. **Different backend?** — Edit [skills/nestjs-patterns.md](skills/nestjs-patterns.md) and update patterns in [rules/patterns.md](rules/patterns.md)
-4. **Different DB?** — Edit [skills/sql-migration-patterns.md](skills/sql-migration-patterns.md)
+4. **Different DB?** — Edit [skills/postgresql-patterns.md](skills/postgresql-patterns.md) and [skills/sql-migration-patterns.md](skills/sql-migration-patterns.md)
+5. **No mobile?** — Remove [skills/react-native-expo-patterns.md](skills/react-native-expo-patterns.md) and [agents/mobile-specialist.md](agents/mobile-specialist.md)
+6. **No real-time?** — Remove [skills/websocket-patterns.md](skills/websocket-patterns.md) and [agents/realtime-architect.md](agents/realtime-architect.md)
 
 ### Adding Custom Hooks
 
@@ -339,7 +369,7 @@ See [examples/minimal-workspace/](examples/minimal-workspace/) for a skeleton Tu
 | Rule | Requirement |
 |------|------------|
 | Module boundaries | Apps cannot import from other apps; use `packages/shared` |
-| Auth guards | Every NestJS endpoint needs `ClerkAuthGuard` + `RolesGuard` |
+| Auth guards | Every NestJS endpoint needs `JwtAuthGuard` + `RolesGuard` (6 roles) |
 | Package manager | pnpm only (enforced by hooks) |
 | Test coverage | 80% minimum per workspace package (configurable) |
 | TDD | Mandatory for new features (configurable per environment) |

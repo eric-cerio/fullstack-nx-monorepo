@@ -5,11 +5,11 @@ This repository is a governance framework for AI-assisted fullstack Turborepo mo
 ## Repository Structure
 
 ```
-agents/       — 12 AI agent prompt templates (planner, reviewer, TDD, etc.)
+agents/       — 16 AI agent prompt templates (planner, reviewer, TDD, mobile, realtime, etc.)
 rules/        — 10 governance rules (coding style, security, testing, etc.)
-commands/     — 13 slash command definitions (/plan, /tdd, /code-review, etc.)
-skills/       — 7 technology pattern libraries (NestJS, Next.js, Clerk, etc.)
-hooks/        — Claude Code hook definitions (hooks.json) — ~29 hooks
+commands/     — 17 slash command definitions (/plan, /tdd, /code-review, /mobile-review, etc.)
+skills/       — 12 technology pattern libraries (NestJS, Next.js, React Native, JWT, PostgreSQL, Redis, WebSocket, etc.)
+hooks/        — Claude Code hook definitions (hooks.json) — ~35 hooks
 bin/          — Scripts (init.sh, validate.sh)
 config/       — Extended configuration (overrides.yml)
 config.yml    — Framework configuration (stack, thresholds, conventions)
@@ -25,7 +25,7 @@ The framework is configured via `config.yml` at the project root. This file defi
 
 - Stack technologies (auth provider, frontend, backend, etc.)
 - Quality thresholds (coverage, file size limits)
-- App names and Clerk roles
+- App names and roles (6 roles: super_admin through viewer)
 - Naming conventions
 
 Agents and validation scripts read `config.yml` to adapt behavior. Modify it to match your project's stack.
@@ -37,10 +37,14 @@ Environment-specific rule relaxation is configured in `config/overrides.yml`. Th
 ## Target Stack
 
 - **Monorepo**: Turborepo + pnpm workspaces
-- **Frontend**: Next.js 15 + shadcn/ui + Tailwind CSS (multiple apps)
-- **Backend**: NestJS 11 REST API
-- **Auth**: Clerk (role-based: admin, partner, resident)
-- **Database**: SQL with timestamp-named migrations
+- **Frontend**: Next.js 15 + shadcn/ui + Tailwind CSS (Landing Page + CMS)
+- **Mobile**: React Native (Expo) for iOS/Android
+- **Backend**: NestJS 11 REST API + WebSocket Gateway
+- **Auth**: JWT (provider-agnostic, access + refresh token rotation)
+- **Database**: PostgreSQL with TypeORM + timestamp-named migrations
+- **Cache/Sessions**: Redis (cache-aside, session storage, pub/sub)
+- **Real-Time**: WebSockets (Socket.io + Redis adapter)
+- **Roles**: super_admin, admin, editor, moderator, support_staff, viewer
 - **Testing**: Jest (unit/integration) + Playwright (E2E)
 - **Linting**: ESLint 9 flat config + Prettier
 
@@ -66,7 +70,8 @@ Environment-specific rule relaxation is configured in `config/overrides.yml`. Th
 
 - pnpm is the only allowed package manager
 - All code patterns assume Turborepo workspace with `apps/` and `packages/` directories
-- Clerk auth is assumed on every endpoint — guards are mandatory
+- JWT auth is assumed on every endpoint — guards are mandatory
+- 6 roles enforced: super_admin, admin, editor, moderator, support_staff, viewer
 - TDD workflow is mandatory: RED → GREEN → REFACTOR
 - 80% test coverage minimum per workspace package (configurable via overrides)
 - Conventional commits: `type(scope): description`
@@ -94,13 +99,17 @@ The standard feature workflow this framework enforces:
 Additional quality commands:
 
 - `/status` — Project health dashboard (coverage, boundaries, compliance)
-- `/full-review` — Chained pipeline: code review → security review → test coverage
+- `/full-review` — Chained pipeline: code review → security review → test coverage → mobile (conditional) → realtime (conditional)
+- `/mobile-review` — React Native/Expo code review
+- `/api-design` — REST API endpoint design and review
+- `/realtime-review` — WebSocket + Redis real-time review
+- `/db-review` — Database schema, query, and migration review
 
 ## Agent Model Guidelines
 
 | Model | Use For |
 |-------|---------|
-| Opus | Complex reasoning: planning, architecture, dependency analysis, documentation, full review |
+| Opus | Complex reasoning: planning, architecture, dependency analysis, documentation, full review, mobile specialist, realtime architect, database architect, API designer |
 | Sonnet | Main work: code review, TDD, testing, security review, migrations, status reporting |
 | Haiku | Lightweight: build error resolution, quick fixes |
 

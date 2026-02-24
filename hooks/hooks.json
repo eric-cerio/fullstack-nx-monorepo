@@ -87,10 +87,20 @@
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] CAUTION: Editing shared package code\" >&2\necho \"[Hook] File: $file_path\" >&2\necho \"[Hook] Changes here affect ALL apps (admin, partner, resident, api)\" >&2\necho \"[Hook] Run 'turbo test --filter=...[HEAD~1]' after changes\" >&2\necho \"$input\""
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] CAUTION: Editing shared package code\" >&2\necho \"[Hook] File: $file_path\" >&2\necho \"[Hook] Changes here affect ALL apps (landing-page, cms, mobile, api)\" >&2\necho \"[Hook] Run 'turbo test --filter=...[HEAD~1]' after changes\" >&2\necho \"$input\""
           }
         ],
-        "description": "Warn when editing shared packages — changes ripple across all apps"
+        "description": "Warn when editing shared packages — changes ripple across all apps (web AND mobile)"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.controller\\\\.(ts|js)$\" && tool_input.new_string matches \"(query|execute|SELECT|INSERT|UPDATE|DELETE)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] WARNING: SQL query detected in controller: $file_path\" >&2\necho \"[Hook] Database queries MUST go through the service layer, not controllers\" >&2\necho \"[Hook] Move query logic to the corresponding .service.ts file\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Warn when SQL queries appear in controller files — must use service layer"
       },
       {
         "matcher": "tool == \"Bash\" && tool_input.command matches \"turbo (build|test|lint|e2e)($| )\"",
@@ -175,14 +185,44 @@
         "description": "Warn when editing existing migration files"
       },
       {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.service\\\\.(ts|js)$\" && tool_input.new_string matches \"(save|update|delete|remove|insert|create)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] Data mutation detected in: $file_path\" >&2\necho \"[Hook] Remember to invalidate relevant Redis cache keys\" >&2\necho \"[Hook] Pattern: await this.redisService.del('resource:id')\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Remind about cache invalidation when editing data mutation services"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"gateway\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] WebSocket Gateway changed: $file_path\" >&2\necho \"[Hook] Verify event naming follows domain:action convention\" >&2\necho \"[Hook] Example: attendance:update, poll:vote, qa:new\" >&2\necho \"[Hook] Ensure JWT auth is validated on connection handshake\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Warn about WebSocket event naming conventions when editing gateway files"
+      },
+      {
         "matcher": "tool == \"Edit\" && tool_input.file_path matches \"(middleware|clerk|auth)\"",
         "hooks": [
           {
             "type": "command",
-            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] Auth-related file changed: $file_path\" >&2\necho \"[Hook] Verify Clerk role-based access (sessionClaims.metadata.role)\" >&2\necho \"[Hook] Test with all roles: admin, partner, resident\" >&2\necho \"$input\""
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] Auth-related file changed: $file_path\" >&2\necho \"[Hook] Verify Clerk role-based access (sessionClaims.metadata.role)\" >&2\necho \"[Hook] Test with all roles: super_admin, admin, editor, moderator, support_staff, viewer\" >&2\necho \"$input\""
           }
         ],
-        "description": "Remind to verify Clerk role-based access after auth file changes"
+        "description": "Remind to verify role-based access after auth file changes"
+      },
+      {
+        "matcher": "tool == \"Edit\" && tool_input.file_path matches \"(app\\\\.json|eas\\\\.json)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\ninput=$(cat)\nfile_path=$(echo \"$input\" | jq -r '.tool_input.file_path // \"\"')\necho \"[Hook] CAUTION: Expo config changed: $file_path\" >&2\necho \"[Hook] Verify: bundle identifier, version, splash screen, permissions\" >&2\necho \"[Hook] Run 'npx expo config --type public' to validate\" >&2\necho \"$input\""
+          }
+        ],
+        "description": "Warn when editing Expo config files (app.json / eas.json)"
       },
       {
         "matcher": "tool == \"Write\" && tool_input.file_path matches \"\\\\.(ts|tsx|js|jsx)$\"",

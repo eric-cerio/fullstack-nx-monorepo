@@ -4,7 +4,7 @@
 
 name: full-review
 description: Comprehensive review pipeline — code, security, and coverage
-version: "1.0.0"
+version: "1.2.0"
 
 stages:
   - name: code-review
@@ -14,7 +14,7 @@ stages:
     fail_on: critical
     checks:
       - module-boundaries
-      - clerk-auth-guards
+      - jwt-auth-guards
       - nestjs-patterns
       - nextjs-patterns
       - code-quality
@@ -45,5 +45,32 @@ verdict:
   approve: "Zero CRITICAL + zero HIGH across all stages + coverage above threshold"
   block: "Any CRITICAL finding in any stage"
   warn: "HIGH findings only OR coverage within 10% of threshold"
+
+  - name: mobile-review
+    agent: mobile-specialist
+    model: opus
+    required: false
+    condition: "files match apps/mobile/**"
+    fail_on: critical
+    checks:
+      - navigation-structure
+      - secure-storage
+      - platform-handling
+      - offline-patterns
+      - expo-config
+      - accessibility
+
+  - name: realtime-review
+    agent: realtime-architect
+    model: opus
+    required: false
+    condition: "files match **/*gateway* OR **/*socket* OR **/*redis*"
+    fail_on: critical
+    checks:
+      - websocket-auth
+      - event-naming
+      - redis-scaling
+      - connection-lifecycle
+      - rate-limiting
 
 output: unified-report

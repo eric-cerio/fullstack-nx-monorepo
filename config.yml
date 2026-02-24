@@ -1,13 +1,16 @@
 # Governance Framework Configuration
-version: "1.0.0"
+version: "1.2.0"
 
 stack:
   monorepo: turborepo
   package_manager: pnpm
   frontend: nextjs-15
   backend: nestjs-11
-  auth_provider: clerk
-  database: sql
+  auth_provider: jwt
+  database: postgresql
+  cache: redis
+  realtime: websockets
+  mobile: react-native-expo
   testing:
     unit: jest
     e2e: playwright
@@ -21,16 +24,18 @@ thresholds:
   max_function_lines: 50
 
 apps:
-  - admin
-  - partner
-  - resident
   - landing-page
+  - cms
+  - mobile
   - api
 
 roles:
+  - super_admin
   - admin
-  - partner
-  - resident
+  - editor
+  - moderator
+  - support_staff
+  - viewer
 
 conventions:
   commits: conventional

@@ -16,10 +16,18 @@ profiles:
         rate_limiting: false
       documentation:
         feature_docs_mandatory: false
+      mobile:
+        expo_ota_updates: false
+        certificate_pinning: false
+        biometric_auth: false
+      cache:
+        redis_required: false
+        cache_invalidation_strict: false
     hooks:
       disable:
         - "console_log_warning"
         - "feature_doc_reminder"
+        - "cache_invalidation_reminder"
 
   staging:
     description: "Staging — moderate strictness"

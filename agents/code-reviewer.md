@@ -101,4 +101,44 @@ Fix: Move shared code to packages/shared
 - ⚠️ Warning: MEDIUM issues only
 - ❌ Block: CRITICAL or HIGH issues found
 
-**Remember**: Always read `docs/features/` first for context. Check module boundaries, Clerk auth, and NestJS patterns before approving.
+### JWT Auth (CRITICAL)
+
+- [ ] Every API endpoint has `JwtAuthGuard` (global) + `@Roles()` decorator
+- [ ] `@Public()` decorator only on genuinely public endpoints
+- [ ] Role hierarchy respected (6 roles: super_admin → viewer)
+- [ ] No role from request body (prevent role escalation)
+- [ ] Refresh token rotation implemented
+- [ ] WebSocket connections validated with JWT on handshake
+
+### React Native / Expo (HIGH)
+
+- [ ] Tokens stored in `expo-secure-store` (NOT AsyncStorage)
+- [ ] Platform-specific code uses `Platform.OS` or `.ios.tsx`/`.android.tsx` files
+- [ ] Navigation structure uses Expo Router correctly
+- [ ] Camera permissions requested before use (QR check-in)
+- [ ] Push notification permissions handled gracefully
+- [ ] Offline fallbacks for critical data (schedule, event info)
+
+### WebSocket Patterns (HIGH)
+
+- [ ] Event naming follows `domain:action` convention
+- [ ] Room management: clients join/leave event rooms properly
+- [ ] No sensitive data broadcast to unauthorized rooms
+- [ ] Vote/upvote deduplication via Redis keys
+- [ ] Rate limiting on client-to-server events
+
+### Redis Cache (MEDIUM)
+
+- [ ] Cache keys follow `resource:id:field` convention
+- [ ] Cache invalidated on data mutations
+- [ ] TTLs appropriate for data type (30s real-time, 5m content)
+- [ ] No stale cache served after writes (write-through or invalidate)
+
+### PostgreSQL (HIGH)
+
+- [ ] Queries use parameterized values (no string interpolation)
+- [ ] N+1 queries avoided (use relations/joins)
+- [ ] Indexes exist for columns in WHERE/ORDER BY/JOIN
+- [ ] Transactions used for multi-table mutations
+
+**Remember**: Always read `docs/features/` first for context. Check module boundaries, JWT auth, NestJS patterns, and platform-specific code before approving.

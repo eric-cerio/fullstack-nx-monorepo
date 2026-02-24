@@ -5,6 +5,31 @@ All notable changes to the Turborepo Fullstack Monorepo Governance Framework wil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-24
+
+### Added
+- 5 new technology skill libraries: React Native/Expo, JWT Auth, PostgreSQL, Redis, WebSocket patterns
+- 4 new senior-level agents: mobile-specialist, realtime-architect, database-architect, api-designer (all Opus)
+- 4 new slash commands: /mobile-review, /api-design, /realtime-review, /db-review
+- 6 new hooks: Expo config warning, SQL-in-controller warning, cache invalidation reminder, WebSocket event naming, shared package mobile warning
+- 2 new conditional pipeline stages: mobile-review, realtime-review in full-review pipeline
+- Example workspace apps: cms, landing-page, mobile (with app.json Expo config)
+- Mobile-specific overrides in config/overrides.yml (development profile)
+
+### Changed
+- Auth system updated from Clerk to provider-agnostic JWT (access + refresh token rotation)
+- Roles expanded from 3 (admin, partner, resident) to 6 (super_admin, admin, editor, moderator, support_staff, viewer)
+- Apps updated from admin/partner/resident/landing-page to landing-page/cms/mobile/api
+- Stack expanded: added postgresql, redis, websockets, react-native-expo to config.yml
+- Framework version bumped to 1.2.0
+
+### Enhanced
+- planner.md: Added tri-platform planning, WebSocket event planning, database schema planning, Redis cache planning
+- architect.md: Added real-time architecture, PostgreSQL schema design, caching layer, mobile-web API sharing
+- code-reviewer.md: Added JWT auth, React Native/Expo, WebSocket, Redis cache, PostgreSQL checklist sections
+- security-reviewer.md: Added JWT token, WebSocket, mobile app, Redis session, CORS, rate limiting sections
+- full-reviewer.md: Added conditional Stage 4 (Mobile Review) and Stage 5 (Real-Time Review)
+
 ## [1.1.0] - 2026-02-19
 
 ### Changed

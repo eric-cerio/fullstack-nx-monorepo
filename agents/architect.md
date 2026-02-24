@@ -190,4 +190,46 @@ export default clerkMiddleware()
 export const config = { matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'] }
 ```
 
-**Remember**: Architecture decisions in a monorepo have cascading effects. Always check workspace dependencies before proposing changes. Shared package changes are high-impact — treat them with extra care.
+## Real-Time Architecture (WebSocket + Redis)
+
+When designing features with real-time requirements:
+
+```
+Client (Mobile/Web) → Socket.io → NestJS Gateway → Redis Pub/Sub → All API instances
+                                        ↓
+                                   Room Management
+                                   (event:{id}, event:{id}:staff)
+```
+
+- Use NestJS `@WebSocketGateway` with Socket.io
+- Authenticate on connection (JWT in handshake)
+- Use Redis adapter (`@socket.io/redis-adapter`) for multi-instance scaling
+- Define event naming: `domain:action` (e.g., `attendance:update`, `poll:vote`)
+
+### PostgreSQL Schema Design
+
+- Use UUID primary keys (`gen_random_uuid()`)
+- Always include audit columns: `created_at`, `updated_at`, `deleted_at` (soft delete)
+- Index foreign keys and columns used in WHERE/ORDER BY
+- Use `timestamptz` for all date columns (timezone-aware)
+- TypeORM entities extend a shared `BaseEntity` with common columns
+
+### Caching Layer (Redis)
+
+```
+Request → Check Redis Cache → Hit? Return cached → Miss? Query PostgreSQL → Cache result → Return
+```
+
+- Cache-aside pattern for read-heavy data (events, schedules, speakers)
+- Short TTL (30 sec) for real-time data (attendance counts)
+- Longer TTL (5-15 min) for slowly-changing data (event details, schedule)
+- No cache for transactional data (polls, Q&A — use WebSocket instead)
+
+### Mobile-Web API Sharing
+
+- Shared types in `packages/shared` used by ALL platforms (Next.js + React Native + NestJS)
+- API endpoints serve both web and mobile clients identically
+- Auth tokens: httpOnly cookies for web, SecureStore for mobile
+- WebSocket connections from both web (landing page attendance) and mobile (engagement features)
+
+**Remember**: Architecture decisions in a monorepo have cascading effects. Always check workspace dependencies before proposing changes. Shared package changes are high-impact — they affect web, mobile, AND API.

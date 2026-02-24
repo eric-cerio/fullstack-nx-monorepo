@@ -140,4 +140,51 @@ export default clerkMiddleware(async (auth, req) => {
 - [ ] [issue description]
 ```
 
-**Remember**: In a multi-app monorepo with role-based auth, the #1 risk is role escalation and cross-app data leakage. Every endpoint must verify the caller's role matches the required access level.
+### JWT Token Security (CRITICAL)
+
+- [ ] Access tokens have short expiry (15 min max)
+- [ ] Refresh tokens stored in Redis with TTL (not in database permanently)
+- [ ] Refresh token rotation on every use (old token invalidated)
+- [ ] Token revocation on password change / account lockout
+- [ ] JWT secret is strong (256-bit minimum) and in env vars only
+- [ ] No sensitive data in JWT payload (no passwords, minimal PII)
+
+### WebSocket Security (CRITICAL)
+
+- [ ] JWT verified on connection handshake (not just on events)
+- [ ] Invalid/expired tokens cause immediate disconnect
+- [ ] Room access validated (staff rooms only for staff roles)
+- [ ] Rate limiting on WebSocket events (prevent spam/DDoS)
+- [ ] No PII broadcast to public rooms
+
+### Mobile App Security (HIGH)
+
+- [ ] Tokens in `expo-secure-store` (NEVER AsyncStorage)
+- [ ] No secrets in app bundle (no API keys in source code)
+- [ ] Certificate pinning considered for production
+- [ ] Biometric auth (expo-local-authentication) for staff functions
+- [ ] QR code validation server-side (don't trust client)
+- [ ] Deep link handlers validate parameters
+
+### Redis Session Security (HIGH)
+
+- [ ] Refresh tokens in Redis have TTL (auto-expire)
+- [ ] Redis connection uses TLS in production
+- [ ] Redis password set and in env vars
+- [ ] No sensitive data cached without encryption consideration
+
+### CORS Configuration (HIGH)
+
+- [ ] CORS restricted to known origins (landing page, CMS, NOT wildcard)
+- [ ] Mobile app uses direct API calls (no CORS needed)
+- [ ] WebSocket CORS matches web app origins
+- [ ] Credentials flag set correctly
+
+### Rate Limiting (MEDIUM)
+
+- [ ] Auth endpoints: 5 attempts per minute per IP
+- [ ] API endpoints: 100 requests per minute per user
+- [ ] WebSocket events: 10 per second per client
+- [ ] Registration/check-in: throttled during high-traffic events
+
+**Remember**: In a multi-platform monorepo with role-based JWT auth, the #1 risks are token theft, role escalation, and WebSocket auth bypass. Every endpoint must verify JWT + role. Every WebSocket connection must be authenticated. Every mobile token must be securely stored.
